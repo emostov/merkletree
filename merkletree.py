@@ -19,14 +19,12 @@ def isPowerOfTwo(n):
             math.floor(Log2(n)));
 
 class Node:
-    def __init__(self, hash, left, right, is_leaf=False):
+    def __init__(self, left, right, is_leaf=False):
         self.left = left
         self.right = right
         self.parent = None
-        self.hash = hash
         self.is_leaf = is_leaf
         self.entry = None
-        self.name = random.randint(1,101)
 
     def teachKids(self, left, right):
         self.left.parent = self
@@ -56,16 +54,17 @@ class MerkleTree:
         self.entries.append(entry)
 
         hash = hashlib.sha512(entry.value.encode()).hexdigest()
-        new_node = Node(hash, None, None, True)
+        new_node = Node( None, None, True)
         new_node.entry = entry
         new_node.entry.key = hash
+
         self.entries_map[entry] = new_node
         self.node_map[hash] = new_node
         return new_node
 
     def updateRoot(self, node):
         self.RootNode = node
-        self.RootHash = node.hash
+        self.RootHash = node.entry.key
         return self.RootHash
 
     def checkIfGranparentRoot(self, node, new_nd):
@@ -85,15 +84,16 @@ class MerkleTree:
         #tree is perfect before insert or is about to have 2 leaves
         elif isPowerOfTwo(len(self.entries)-1) or len(self.entries) == 2:
             future_sib = self.RootNode
-            str = future_sib.hash + new_leaf_node.hash
-            new_val = future_sib.entry.value + new_leaf_node.entry.value
-
+            str = future_sib.entry.key + new_leaf_node.entry.key
             new_root_hash = hashlib.sha512(str.encode()).hexdigest()
-            new_root = Node(new_root_hash, future_sib, new_leaf_node)
+
+            new_val = future_sib.entry.value + new_leaf_node.entry.value
+            new_root = Node(future_sib, new_leaf_node)
+            new_root.makeEntry(new_root_hash, new_val)
+
             new_root.teachKids(future_sib, new_leaf_node)
             self.node_map[new_root_hash] = new_root
 
-            new_root.makeEntry(new_root_hash, new_val)
             return self.updateRoot(new_root)
 
         second_to_last_entry = self.entries[-2]
@@ -106,50 +106,57 @@ class MerkleTree:
 
             if temp_root == self.RootNode: #given is already at root
                 self.updateRoot(temp_root)
-                return temp_root.hash
+                return temp_root.entry.key
 
             #initial insert and there is no lonely leaf but not balance
             elif temp_root.parent.left.is_leaf and temp_root.is_leaf:
-                str = temp_root.parent.hash + new_leaf_node.hash
-                new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
-
+                str = temp_root.parent.entry.key + new_leaf_node.entry.key
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-                new_nd = Node(new_nd_h, temp_root.parent, new_leaf_node)
+
+                new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
+                new_nd = Node(temp_root.parent, new_leaf_node)
+                new_nd.makeEntry(new_nd_h, new_val)
+
                 new_nd.makeEntry(new_nd_h, new_val)
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent, new_leaf_node)
                 self.node_map[new_nd_h] = new_nd
 
-                new_nd.makeEntry(new_nd_h, new_val)
+
                 recurse(new_nd)
 
             #initial insert of leaf and there is already a lonely leaf
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf:
-                str = temp_root.hash + new_leaf_node.hash
-                new_val = temp_root.entry.value + new_leaf_node.entry.value
-
+                str = temp_root.entry.key + new_leaf_node.entry.key
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-                new_nd = Node(new_nd_h, temp_root, new_leaf_node)
+
+                new_val = temp_root.entry.value + new_leaf_node.entry.value
+                new_nd = Node(temp_root, new_leaf_node)
+                new_nd.makeEntry(new_nd_h, new_val)
+
                 new_nd.parent = temp_root.parent
                 new_nd.teachKids(temp_root, new_leaf_node)
                 self.node_map[new_nd_h] = new_nd
 
-                new_nd.makeEntry(new_nd_h, new_val)
+
                 recurse(new_nd)
 
             #percolating up after an insert
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
-                str = temp_root.parent.left.hash + new_leaf_node.hash
-                new_val = temp_root.parent.left.entry.value + new_leaf_node.entry.value
-                node_to_delete_key = temp_root.parent.hash
+                node_to_delete_key = temp_root.parent.entry.key
+
+                str = temp_root.parent.left.entry.key + new_leaf_node.entry.key
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-                new_nd = Node(new_nd_h, temp_root.parent.left, temp_root)
+
+                new_val = temp_root.parent.left.entry.value + new_leaf_node.entry.value
+                new_nd = Node(temp_root.parent.left, temp_root)
+                new_nd.makeEntry(new_nd_h, new_val)
+
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent.left, temp_root)
                 self.node_map[new_nd_h] = new_nd
                 del self.node_map[node_to_delete_key] #delete old parent
 
-                new_nd.makeEntry(new_nd_h, new_val)
                 recurse(new_nd)
 
         recurse(farthest_right_leaf)
