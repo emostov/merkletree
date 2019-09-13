@@ -121,10 +121,13 @@ class MerkleTree:
             #percolating up after an insert
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
                 str = temp_root.parent.left.hash + new_leaf_node.hash
+                node_to_delete_key = temp_root.parent.hash
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
                 new_nd = Node(new_nd_h, temp_root.parent.left, temp_root)
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent.left, temp_root)
+                self.node_map[new_nd_h] = new_nd
+                del self.node_map[node_to_delete_key] #delete old parent
                 recurse(new_nd)
 
         recurse(farthest_right_leaf)

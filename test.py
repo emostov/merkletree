@@ -94,8 +94,28 @@ def test():
     t.Insert(g)
     print("test 7")
     print2D(t.RootNode)
+    print("node map length: ", len(t.node_map))
+
+def pnm():
+    t = MerkleTree()
+    a = Entry("a")
+    b = Entry("b")
+    c = Entry("c")
+    d = Entry("d")
+    e = Entry("e")
+    f = Entry("f")
+    g = Entry("g")
+    t.Insert(a)
+    t.Insert(b)
+    t.Insert(c)
+    t.Insert(d)
+    t.Insert(e)
+    t.Insert(f)
+    t.Insert(g)
+    #print(t.node_map)
 
 
 
 
 test()
+#pnm()
