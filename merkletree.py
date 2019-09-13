@@ -1,6 +1,5 @@
 import hashlib
 import random
-
 import math
 
 #froom poweroftwo is from geeks to geeks
@@ -131,22 +130,22 @@ class MerkleTree:
                 #new_nd_h = hash(temp_root.hash + new_leaf_node.hash)
                 str = temp_root.hash + new_leaf_node.hash
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-
                 new_nd = Node(new_nd_h, temp_root, new_leaf_node)
                 new_nd.parent = temp_root.parent
                 new_nd.teachKids(temp_root, new_leaf_node)
+                self.node_map[new_nd_h] = new_nd
                 recurse(new_nd)
             #percolating up after an insert
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
                 #new_nd_h = hash(temp_root.parent.left.hash + temp_root.hash)
                 str = temp_root.parent.left.hash + new_leaf_node.hash
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-
-                node_to_delete_key = temp_root.parent.hash
+                #node_to_delete_key = temp_root.parent.hash
+                #print("this exists", self.node_map[node_to_delete_key] )
                 new_nd = Node(new_nd_h, temp_root.parent.left, temp_root)
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent.left, temp_root)
-                del self.node_map[node_to_delete_key]
+                #del self.node_map[node_to_delete_key]
                 recurse(new_nd)
 
         recurse(farthest_right_leaf)
