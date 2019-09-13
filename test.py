@@ -74,12 +74,20 @@ def test4():
 def test():
     t = MerkleTree()
     a = Entry("a")
+    a.makeKey()
+    print(a.key)
     b = Entry("b")
+    b.makeKey()
     c = Entry("c")
+    c.makeKey()
     d = Entry("d")
+    d.makeKey()
     e = Entry("e")
+    e.makeKey()
     f = Entry("f")
+    f.makeKey()
     g = Entry("g")
+    g.makeKey()
 
     t.Insert(a)
     t.Insert(b)
@@ -96,15 +104,28 @@ def test():
     print2D(t.RootNode)
     print("node map length: ", len(t.node_map))
 
+def printMerklePath(t, merklepath):
+    for key in merklepath:
+        print(t.node_map[key].entry.value)
+
 def pnm():
     t = MerkleTree()
     a = Entry("a")
+    a.makeKey()
+    print(a.key)
     b = Entry("b")
+    b.makeKey()
     c = Entry("c")
+    c.makeKey()
     d = Entry("d")
+    d.makeKey()
     e = Entry("e")
+    e.makeKey()
     f = Entry("f")
+    f.makeKey()
     g = Entry("g")
+    g.makeKey()
+
     t.Insert(a)
     t.Insert(b)
     t.Insert(c)
@@ -112,10 +133,21 @@ def pnm():
     t.Insert(e)
     t.Insert(f)
     t.Insert(g)
+
+    print("test 7")
+    print2D(t.RootNode)
+    
+    path = t.generateMerklePath(a.key)
+    printMerklePath(t, path)
+
+    #print("Merkle Path a", t.generateMerklePath(a.key))
+    #print("a merkle_path length", len(t.generateMerklePath(a.key)))
+
+
     #print(t.node_map)
 
 
 
 
-test()
-#pnm()
+#test()
+pnm()

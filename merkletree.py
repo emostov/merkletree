@@ -40,6 +40,11 @@ class Entry:
         self.value = value
         self.key = key
 
+    def makeKey(self):
+        hash = hashlib.sha512(self.value.encode()).hexdigest()
+        self.key = hash
+        #makes key from value, should only be used when making a leaf
+
 class MerkleTree:
 
     def __init__(self):
@@ -48,18 +53,15 @@ class MerkleTree:
         self.entries_map = {} #map entry to node
         self.node_map = {} #map hash to node
 
-
     def makeLeafNode(self, entry):
         #makes a leaf node and updates the entries
+        #entry.makeKey()
         self.entries.append(entry)
-
-        hash = hashlib.sha512(entry.value.encode()).hexdigest()
+        #hash = entry.key#hashlib.sha512(entry.value.encode()).hexdigest()
         new_node = Node( None, None, True)
         new_node.entry = entry
-        new_node.entry.key = hash
-
         self.entries_map[entry] = new_node
-        self.node_map[hash] = new_node
+        self.node_map[entry.key] = new_node
         return new_node
 
     def updateRoot(self, node):
@@ -160,3 +162,17 @@ class MerkleTree:
                 recurse(new_nd)
 
         recurse(farthest_right_leaf)
+
+    def generateMerklePath(self, key):
+        merkle_path = []
+        if key in self.node_map:
+            node = self.node_map[key]
+        else:
+            return "path_not_found"
+
+        while node is not self.RootNode:
+            merkle_path.append(node.entry.key)
+            node = node.parent
+
+        merkle_path.append(node.entry.key)
+        return merkle_path
