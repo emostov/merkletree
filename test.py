@@ -65,10 +65,10 @@ def test4():
     #tp(t)
     t.Insert(c)
     #tpname(t)
-    print("Test 3")
+    print("Test 3_________")
     print2D(t.RootNode)
     t.Insert(d)
-    print("Test 4")
+    print("Test 4_________")
     print2D(t.RootNode)
 
 def test():
@@ -105,6 +105,7 @@ def test():
     print("node map length: ", len(t.node_map))
 
 def printMerklePath(t, merklepath):
+    print('below is merkle path')
     for key in merklepath:
         print(t.node_map[key].entry.value)
 
@@ -128,31 +129,31 @@ def pnm():
 
     t.Insert(a)
     t.Insert(b)
-    print("test 2")
+    print("test 2_________")
     print2D(t.RootNode)
 
     t.Insert(c)
-    print("test 3")
+    print("test 3_________")
     print2D(t.RootNode)
 
     t.Insert(d)
-    print("test 4")
+    print("test 4_________")
     print2D(t.RootNode)
 
 
     t.Insert(e)
-    print("test 5")
+    print("test 5_________")
     print2D(t.RootNode)
 
     t.Insert(f)
 
 
-    print("test 6")
+    print("test 6_________")
     print2D(t.RootNode)
 
     t.Insert(g)
 
-    print("test 7")
+    print("test 7_________")
     print2D(t.RootNode)
 
     path = t.generateMerklePath(a.key)

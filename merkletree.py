@@ -2,6 +2,8 @@ import hashlib
 import random
 import math
 
+#TODO write read me and change to hash the entire entry object
+
 #froom poweroftwo is from geeks to geeks
 # Function to check
 # Log base 2
@@ -140,7 +142,6 @@ class MerkleTree:
                 new_nd.teachKids(temp_root, new_leaf_node)
                 self.node_map[new_nd_h] = new_nd
 
-
                 recurse(new_nd)
 
             #percolating up after an insert
@@ -150,9 +151,10 @@ class MerkleTree:
                 str = temp_root.parent.left.entry.key + new_leaf_node.entry.key
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-                new_val = temp_root.parent.left.entry.value + new_leaf_node.entry.value
+                new_val = temp_root.parent.left.entry.value + temp_root.entry.value
                 new_nd = Node(temp_root.parent.left, temp_root)
                 new_nd.makeEntry(new_nd_h, new_val)
+                print("reffers to below test: new node when creating new interal", new_nd.entry.value)
 
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent.left, temp_root)
@@ -171,8 +173,9 @@ class MerkleTree:
             return "path_not_found"
 
         while node is not self.RootNode:
-            merkle_path.append(node.entry.key)
+            if node.parent.right = node: #is right nodes
+                merkle_path.append(node.parent.left.entry.key)
+            else:
+                merkle_path.append(node.parent.right.entry.key)
             node = node.parent
-
-        merkle_path.append(node.entry.key)
         return merkle_path
