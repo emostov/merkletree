@@ -128,15 +128,33 @@ def pnm():
 
     t.Insert(a)
     t.Insert(b)
+    print("test 2")
+    print2D(t.RootNode)
+
     t.Insert(c)
+    print("test 3")
+    print2D(t.RootNode)
+
     t.Insert(d)
+    print("test 4")
+    print2D(t.RootNode)
+
+
     t.Insert(e)
+    print("test 5")
+    print2D(t.RootNode)
+
     t.Insert(f)
+
+
+    print("test 6")
+    print2D(t.RootNode)
+
     t.Insert(g)
 
     print("test 7")
     print2D(t.RootNode)
-    
+
     path = t.generateMerklePath(a.key)
     printMerklePath(t, path)
 
