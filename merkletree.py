@@ -1,7 +1,6 @@
 import hashlib
 import random
 import math
-import json
 
 #TODO write read
 

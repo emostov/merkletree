@@ -30,46 +30,20 @@ def print2D(root) :
     # Pass initial space count as 0
     print2DUtil(root, 0)
 
-def tpname(t):
-    print("start")
-    print("root is: ", t.RootNode)
-    for hash, node in t.node_map.items():
-        print("node", node, "left", node.left, "right", node.right)
-        print("name: ", node.name)
-        if node.entry != None:
-            print("entry val: ", node.entry.value)
+def example():
+    t = MerkleTree() #create a MerkleTree instance
+    a = Entry("a") #create an entry instance, initializing value to "a"
+    a.makeKey() #create a key based on output of SHA512(value)
+    t.Insert(a) #insert the complete entry into the tree
+    #insert will return a string of the inserted nodes key in hexadecimal
 
-def tpname(t):
-    print("start")
-    print("root is: ", t.RootNode.name)
-    for hash, node in t.node_map.items():
-        print("node", node.name, node, "left:", node.left, "right:", node.right)
-        if node.entry != None:
-            print("entry val: ", node.entry.value)
-
-
-def test4():
-    t = MerkleTree()
-
-    a = Entry("a")
-    b = Entry("b")
-
-    c = Entry("c")
-    d = Entry("d")
-    t.Insert(a)
-
-    #tp(t)
+    b = Entry("b") #create an entry instance, initializing value to "a"
+    b.makeKey() #create a key based on output of SHA512(value)
     t.Insert(b)
-    #print("Test 2")
-    #print2D(t.RootNode)
-    #tp(t)
-    t.Insert(c)
-    #tpname(t)
-    print("Test 3_________")
-    print2D(t.RootNode)
-    t.Insert(d)
-    print("Test 4_________")
-    print2D(t.RootNode)
+
+    t.generateMerklePath(b) #pass an Entry instance to the method
+    #returns [hexDecSHA512(a)] which is the merkle path of b
+
 
 def test():
     t = MerkleTree()
