@@ -1,8 +1,9 @@
 import hashlib
 import random
 import math
+import json
 
-#TODO write read me and change to hash the entire entry object
+#TODO write read
 
 #froom poweroftwo is from geeks to geeks
 # Function to check
@@ -43,9 +44,13 @@ class Entry:
         self.key = key
 
     def makeKey(self):
+        #makes key from value, should only be used when making a leaf
         hash = hashlib.sha512(self.value.encode()).hexdigest()
         self.key = hash
-        #makes key from value, should only be used when making a leaf
+
+    def toString(self):
+        return "{key: "+self.key+", value: "+self.value+"}"
+
 
 class MerkleTree:
 
@@ -88,9 +93,8 @@ class MerkleTree:
         #tree is perfect before insert or is about to have 2 leaves
         elif isPowerOfTwo(len(self.entries)-1) or len(self.entries) == 2:
             future_sib = self.RootNode
-            str = future_sib.entry.key + new_leaf_node.entry.key
+            str = future_sib.entry.toString() + new_leaf_node.entry.toString()
             new_root_hash = hashlib.sha512(str.encode()).hexdigest()
-
             new_val = future_sib.entry.value + new_leaf_node.entry.value
             new_root = Node(future_sib, new_leaf_node)
             new_root.makeEntry(new_root_hash, new_val)
@@ -114,7 +118,7 @@ class MerkleTree:
 
             #initial insert and there is no lonely leaf but not balance
             elif temp_root.parent.left.is_leaf and temp_root.is_leaf:
-                str = temp_root.parent.entry.key + new_leaf_node.entry.key
+                str = temp_root.parent.entry.toString() + new_leaf_node.entry.toString()
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
                 new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
@@ -126,12 +130,11 @@ class MerkleTree:
                 new_nd.teachKids(temp_root.parent, new_leaf_node)
                 self.node_map[new_nd_h] = new_nd
 
-
                 recurse(new_nd)
 
             #initial insert of leaf and there is already a lonely leaf
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf:
-                str = temp_root.entry.key + new_leaf_node.entry.key
+                str = temp_root.entry.toString() + new_leaf_node.entry.toString()
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
                 new_val = temp_root.entry.value + new_leaf_node.entry.value
@@ -148,13 +151,12 @@ class MerkleTree:
             elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
                 node_to_delete_key = temp_root.parent.entry.key
 
-                str = temp_root.parent.left.entry.key + new_leaf_node.entry.key
+                str = temp_root.parent.left.entry.toString() + new_leaf_node.entry.toString()
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
                 new_val = temp_root.parent.left.entry.value + temp_root.entry.value
                 new_nd = Node(temp_root.parent.left, temp_root)
                 new_nd.makeEntry(new_nd_h, new_val)
-                print("reffers to below test: new node when creating new interal", new_nd.entry.value)
 
                 self.checkIfGranparentRoot(temp_root, new_nd)
                 new_nd.teachKids(temp_root.parent.left, temp_root)
@@ -173,7 +175,7 @@ class MerkleTree:
             return "path_not_found"
 
         while node is not self.RootNode:
-            if node.parent.right = node: #is right nodes
+            if node.parent.right == node: #is right nodes
                 merkle_path.append(node.parent.left.entry.key)
             else:
                 merkle_path.append(node.parent.right.entry.key)

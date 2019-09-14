@@ -109,7 +109,7 @@ def printMerklePath(t, merklepath):
     for key in merklepath:
         print(t.node_map[key].entry.value)
 
-def pnm():
+def largeTest():
     t = MerkleTree()
     a = Entry("a")
     a.makeKey()
@@ -128,45 +128,53 @@ def pnm():
     g.makeKey()
 
     t.Insert(a)
+    print("insert a test 1____________________________________")
+    print2D(t.RootNode)
+
     t.Insert(b)
-    print("test 2_________")
+    print("insert b test 2_____________________________________________")
     print2D(t.RootNode)
 
     t.Insert(c)
-    print("test 3_________")
+    print("insert c test 3_____________________________________________")
     print2D(t.RootNode)
 
     t.Insert(d)
-    print("test 4_________")
+    print("insert d test 4_____________________________________________")
     print2D(t.RootNode)
 
 
     t.Insert(e)
-    print("test 5_________")
+    print("insert e test 5_____________________________________________")
     print2D(t.RootNode)
 
     t.Insert(f)
-
-
-    print("test 6_________")
+    print("insert f test 6_____________________________________________")
     print2D(t.RootNode)
 
     t.Insert(g)
-
-    print("test 7_________")
+    print("insert g test 7_____________________________________________")
     print2D(t.RootNode)
 
     path = t.generateMerklePath(a.key)
+    print("a path")
     printMerklePath(t, path)
 
-    #print("Merkle Path a", t.generateMerklePath(a.key))
-    #print("a merkle_path length", len(t.generateMerklePath(a.key)))
+    path = t.generateMerklePath(b.key)
+    print("b path")
+    printMerklePath(t, path)
 
+    path = t.generateMerklePath(c.key)
+    print("c path")
+    printMerklePath(t, path)
 
-    #print(t.node_map)
+    path = t.generateMerklePath(e.key)
+    print("e path")
+    printMerklePath(t, path)
 
-
-
+    path = t.generateMerklePath(g.key)
+    print("g path")
+    printMerklePath(t, path)
 
 #test()
-pnm()
+largeTest()
