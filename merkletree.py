@@ -2,9 +2,8 @@ import hashlib
 import random
 import math
 
-#TODO write read
 
-#froom poweroftwo is from geeks to geeks
+#from poweroftwo is from geeks to geeks
 # Function to check
 # Log base 2
 def Log2(x):
@@ -83,6 +82,32 @@ class MerkleTree:
             self.updateRoot(new_nd)
 
     def Insert(self, entry):
+        def recurse(temp_root):
+            #recurse deals with initial insertion and then percolates up
+            #if the tree is at least 2 nodes big do the initial insertion
+            #Within each call to recursive function to percolate up inserts
+            if temp_root == self.RootNode: #given is already at root
+                self.updateRoot(temp_root)
+                return temp_root.entry.key
+
+            #percolating up after an insert
+            elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
+                node_to_delete_key = temp_root.parent.entry.key
+
+                str = temp_root.parent.left.entry.toString() + new_leaf_node.entry.toString()
+                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
+
+                new_val = temp_root.parent.left.entry.value + temp_root.entry.value
+                new_nd = Node(temp_root.parent.left, temp_root)
+                new_nd.makeEntry(new_nd_h, new_val)
+
+                self.checkIfGranparentRoot(temp_root, new_nd)
+                new_nd.teachKids(temp_root.parent.left, temp_root)
+                self.node_map[new_nd_h] = new_nd
+                del self.node_map[node_to_delete_key] #delete old parent
+
+                recurse(new_nd)
+
         new_leaf_node = self.makeLeafNode(entry)
 
         #check if there is 0 or 1 nodes in the tree
@@ -104,67 +129,42 @@ class MerkleTree:
             return self.updateRoot(new_root)
 
         second_to_last_entry = self.entries[-2]
-        farthest_right_leaf = self.entries_map[second_to_last_entry]
+#        farthest_right_leaf = self.entries_map[second_to_last_entry]
+        temp_root = self.entries_map[second_to_last_entry]
 
-        def recurse(temp_root):
-            #recurse deals with initial insertion and then percolates up
-            #if the tree is at least 2 nodes big do the initial insertion
-            #Within each call to recursive function to percolate up inserts
+        #initial insert and there is no lonely leaf but not balance
+        if temp_root.parent.left.is_leaf and temp_root.is_leaf:
+            str = temp_root.parent.entry.toString() + new_leaf_node.entry.toString()
+            new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-            if temp_root == self.RootNode: #given is already at root
-                self.updateRoot(temp_root)
-                return temp_root.entry.key
+            new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
+            new_nd = Node(temp_root.parent, new_leaf_node)
+            new_nd.makeEntry(new_nd_h, new_val)
 
-            #initial insert and there is no lonely leaf but not balance
-            elif temp_root.parent.left.is_leaf and temp_root.is_leaf:
-                str = temp_root.parent.entry.toString() + new_leaf_node.entry.toString()
-                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
+            new_nd.makeEntry(new_nd_h, new_val)
+            self.checkIfGranparentRoot(temp_root, new_nd)
+            new_nd.teachKids(temp_root.parent, new_leaf_node)
+            self.node_map[new_nd_h] = new_nd
 
-                new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
-                new_nd = Node(temp_root.parent, new_leaf_node)
-                new_nd.makeEntry(new_nd_h, new_val)
+            recurse(new_nd)
 
-                new_nd.makeEntry(new_nd_h, new_val)
-                self.checkIfGranparentRoot(temp_root, new_nd)
-                new_nd.teachKids(temp_root.parent, new_leaf_node)
-                self.node_map[new_nd_h] = new_nd
+        #initial insert of leaf and there is already a lonely leaf
+        elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf:
+            str = temp_root.entry.toString() + new_leaf_node.entry.toString()
+            new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-                recurse(new_nd)
+            new_val = temp_root.entry.value + new_leaf_node.entry.value
+            new_nd = Node(temp_root, new_leaf_node)
+            new_nd.makeEntry(new_nd_h, new_val)
 
-            #initial insert of leaf and there is already a lonely leaf
-            elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf:
-                str = temp_root.entry.toString() + new_leaf_node.entry.toString()
-                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
+            new_nd.parent = temp_root.parent
+            new_nd.teachKids(temp_root, new_leaf_node)
+            self.node_map[new_nd_h] = new_nd
 
-                new_val = temp_root.entry.value + new_leaf_node.entry.value
-                new_nd = Node(temp_root, new_leaf_node)
-                new_nd.makeEntry(new_nd_h, new_val)
+            recurse(new_nd)
 
-                new_nd.parent = temp_root.parent
-                new_nd.teachKids(temp_root, new_leaf_node)
-                self.node_map[new_nd_h] = new_nd
-
-                recurse(new_nd)
-
-            #percolating up after an insert
-            elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf == False:
-                node_to_delete_key = temp_root.parent.entry.key
-
-                str = temp_root.parent.left.entry.toString() + new_leaf_node.entry.toString()
-                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
-
-                new_val = temp_root.parent.left.entry.value + temp_root.entry.value
-                new_nd = Node(temp_root.parent.left, temp_root)
-                new_nd.makeEntry(new_nd_h, new_val)
-
-                self.checkIfGranparentRoot(temp_root, new_nd)
-                new_nd.teachKids(temp_root.parent.left, temp_root)
-                self.node_map[new_nd_h] = new_nd
-                del self.node_map[node_to_delete_key] #delete old parent
-
-                recurse(new_nd)
-
-        recurse(farthest_right_leaf)
+#        recurse(farthest_right_leaf)
+#        recurse(temp_root)
 
     def generateMerklePath(self, key):
         merkle_path = []
