@@ -44,6 +44,10 @@ def example():
     t.generateMerklePath(b) #pass an Entry instance to the method
     #returns [hexDecSHA512(a)] which is the merkle path of b
 
+def printNodeMap(t):
+    for key in t.node_map.keys():
+        print (t.node_map[key].entry.toString())
+
 
 def test():
     t = MerkleTree()
@@ -77,6 +81,7 @@ def test():
     print("test 7")
     print2D(t.RootNode)
     print("node map length: ", len(t.node_map))
+
 
 def printMerklePath(t, merklepath):
     print('below is merkle path')
@@ -130,25 +135,38 @@ def largeTest():
     print("insert g test 7_____________________________________________")
     print2D(t.RootNode)
 
-    path = t.generateMerklePath(a.key)
-    print("a path")
-    printMerklePath(t, path)
+    pathA = t.generateMerklePath(a.key)
+    print("a's merkle path")
+    printMerklePath(t, pathA)
+    print("a verification", t.VerifyMerklePath(a, pathA))
 
-    path = t.generateMerklePath(b.key)
-    print("b path")
-    printMerklePath(t, path)
+    pathB = t.generateMerklePath(b.key)
+    print("b merkle path below")
+    printMerklePath(t, pathB)
+    print("b verification", t.VerifyMerklePath(b, pathB))
 
-    path = t.generateMerklePath(c.key)
-    print("c path")
-    printMerklePath(t, path)
+    pathC = t.generateMerklePath(c.key)
+    # print("c path")
+    # printMerklePath(t, path)
+    print("c verification", t.VerifyMerklePath(c, pathC))
 
-    path = t.generateMerklePath(e.key)
-    print("e path")
-    printMerklePath(t, path)
+    pathE = t.generateMerklePath(e.key)
+    #print("e path")
+    #printMerklePath(t, path)
+    print("e verification", t.VerifyMerklePath(e, pathE))
 
-    path = t.generateMerklePath(g.key)
-    print("g path")
-    printMerklePath(t, path)
+    pathG = t.generateMerklePath(g.key)
+    # print("g path")
+    # printMerklePath(t, pathG)
+    print("g verification", t.VerifyMerklePath(g, pathG))
+
+    fake_node = Entry("fake_node")
+    fake_node.makeKey()
+    print("fake node verification with a's merkle path", t.VerifyMerklePath(fake_node, pathA))
+
+
+
+    #printNodeMap(t)
 
 #test()
 largeTest()

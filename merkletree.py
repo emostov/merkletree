@@ -54,6 +54,7 @@ class MerkleTree:
 
     def __init__(self):
         self.RootNode = None #node class
+        self.RootHash = None
         self.entries = [] #list of entries
         self.entries_map = {} #map entry to node
         self.node_map = {} #map hash to node
@@ -84,15 +85,15 @@ class MerkleTree:
     def Insert(self, entry):
 
         new_leaf_node = self.makeLeafNode(entry)
-
-        #check if there is 0 or 1 nodes in the tree
+        #check if node is about to have only 1 leaf
         if len(self.entries) == 1: # first insert
             return self.updateRoot(new_leaf_node)
 
         #tree is perfect before insert or is about to have 2 leaves
         elif isPowerOfTwo(len(self.entries)-1) or len(self.entries) == 2:
             future_sib = self.RootNode
-            str = future_sib.entry.toString() + new_leaf_node.entry.toString()
+            str = future_sib.entry.key + new_leaf_node.entry.key
+#            str = future_sib.entry.toString() + new_leaf_node.entry.toString()
             new_root_hash = hashlib.sha512(str.encode()).hexdigest()
             new_val = future_sib.entry.value + new_leaf_node.entry.value
             new_root = Node(future_sib, new_leaf_node)
@@ -108,7 +109,8 @@ class MerkleTree:
 
         #initial insert and there is no lonely leaf but not balance
         if temp_root.parent.left.is_leaf and temp_root.is_leaf:
-            str = temp_root.parent.entry.toString() + new_leaf_node.entry.toString()
+            str = temp_root.parent.entry.key + new_leaf_node.entry.key
+#            str = temp_root.parent.entry.toString() + new_leaf_node.entry.toString()
             new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
             new_val = temp_root.parent.entry.value + new_leaf_node.entry.value
@@ -124,7 +126,8 @@ class MerkleTree:
 
         #initial insert of leaf and there is already a lonely leaf
         elif temp_root.parent.left.is_leaf == False and temp_root.is_leaf:
-            str = temp_root.entry.toString() + new_leaf_node.entry.toString()
+            str = temp_root.entry.key + new_leaf_node.entry.key
+#            str = temp_root.entry.toString() + new_leaf_node.entry.toString()
             new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
             new_val = temp_root.entry.value + new_leaf_node.entry.value
@@ -137,10 +140,11 @@ class MerkleTree:
 
             temp_root = new_nd
 
+        #inserts after the initial insert
         while temp_root != self.RootNode:
             node_to_delete_key = temp_root.parent.entry.key
-
-            str = temp_root.parent.left.entry.toString() + new_leaf_node.entry.toString()
+            str = temp_root.parent.left.entry.key + temp_root.entry.key
+#            str = temp_root.parent.left.entry.toString() + new_leaf_node.entry.toString()
             new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
             new_val = temp_root.parent.left.entry.value + temp_root.entry.value
@@ -171,4 +175,52 @@ class MerkleTree:
             node = node.parent
         return merkle_path
 
-    
+    def Delete(self, entry: Entry):
+        """
+        The Delete function takes a key (Entry) as argument, traverses the
+        Merkle Tree and finds that key. If the key exists, delete the
+        corresponding Entry and re-balance the tree if necessary. Delete
+        function will return updated root hash if the key was found otherwise
+        return empty string (or ‘’path_not_found”) if the key doesn't exist.
+        """
+        if entry not in self.entries_map.keys():
+            return 'path_not_found'
+        #TODO check if tree is balanced and then go balance it
+
+    def VerifyMerklePath(self, entry, merkle_path):
+        '''
+        The VerifyMerklePath function takes a key (Entry) and its Merkle path,
+        the ordered list of sibling hashes as argument. It computes all the
+        hashes on the path from the given Entry to the root using the location
+        and the MerklePath. The newly computed root hash is compared to the
+        stored root for verification. Function returns true if the
+        verification succeeds (if the newly computed root hash is equal to
+        the stored root hash) otherwise return false.
+        Arguments: Entry object, location (or index) of this Entry object in
+        the Merkle Tree, and the list/array of hashes on Merkle Path
+        Return: bool
+        '''
+        if entry not in self.entries_map.keys():
+            return False
+        node = self.entries_map[entry]
+        i = 0
+        # is_left = False
+        # if node == node.parent.left:
+        #     is_left = True
+        #     #print(" in left set")
+        # else:
+        #     is_left = False
+        parent_hash = node.entry.key
+        #print(node.entry.toString())
+        #print(self.node_map[merkle_path[i]].entry.toString())
+        while i < len(merkle_path):
+            #check if right or left
+            if parent_hash not in self.node_map:
+                return False
+            if self.node_map[parent_hash] == self.node_map[parent_hash].parent.left:
+                str = parent_hash + merkle_path[i]
+            else:
+                str = merkle_path[i] + parent_hash
+            parent_hash = hashlib.sha512(str.encode()).hexdigest()
+            i += 1
+        return parent_hash == self.RootHash
