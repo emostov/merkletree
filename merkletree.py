@@ -2,8 +2,7 @@ import hashlib
 import random
 import math
 
-
-#from poweroftwo is from geeks to geeks
+#poweroftwo is from geeks to geeks
 # Function to check
 # Log base 2
 def Log2(x):
@@ -33,7 +32,6 @@ class Node:
 
     def makeEntry(self, key, value):
         entry = Entry(value, key)
-        #entry.key = new_root_hash
         self.entry = entry
 
 class Entry:
@@ -54,7 +52,7 @@ class MerkleTree:
 
     def __init__(self):
         self.RootNode = None #node class
-        self.RootHash = None
+        self.RootHash = None #hex decimal hash
         self.entries = [] #list of entries
         self.entries_map = {} #map entry to node
         self.node_map = {} #map hash to node
@@ -175,7 +173,42 @@ class MerkleTree:
             node = node.parent
         return merkle_path
 
-    def Delete(self, entry: Entry):
+    def getRightMostNode(self):
+        #returns right most node
+        right_nd = self.RootNode
+        while right_nd.is_leaf != True:
+            right_nd = nd.right
+        return right_nd
+
+    def getAndRemoveRightMostNode(self):
+        #removes right most node from its spot and returns it
+        #deletes the parent of right most node and points sibling
+        #to grandparent
+        #Deals with special case of 1 or 2 leafs
+        right_nd = self.RootNode
+        while right_nd.is_leaf != True:
+            right_nd = nd.right
+        if right_nd.parent = None:
+            #special case 1 leaf
+            return right_nd
+        elif right_nd.parent = self.RootNode:
+            #special case 2 leafs
+            self.RootNode = right_nd.parent.left
+            self.RootNode.parent = None
+#            return self.RootNode this is implicit at end of func
+        else:
+            grandparent = right_nd.parent.parent
+            grandparent.right = righ_nd.parent.left
+            right_nd.parent.left.parent = grandparent
+        parent_to_delete = righ_nd.parent.entry.key
+        del self.node_map[parent_to_delete]
+        return right_nd
+
+    def deleteLeafFromMaps(self, node):
+        del self.entries_map[node.entry]
+        del self.node_map[node.entry.key]
+
+    def Delete(self, entry):
         """
         The Delete function takes a key (Entry) as argument, traverses the
         Merkle Tree and finds that key. If the key exists, delete the
@@ -183,8 +216,35 @@ class MerkleTree:
         function will return updated root hash if the key was found otherwise
         return empty string (or ‘’path_not_found”) if the key doesn't exist.
         """
-        if entry not in self.entries_map.keys():
+        if entry not in self.entries_map:
             return 'path_not_found'
+
+        delete_nd = self.entries_map[entry]
+        right_nd = self.getAndRemoveRightMostNode()
+        if right_nd == delete_nd:
+            if len(self.entries_map) == 1:
+                #special case of only one node in tree
+                self.RootHash = None
+                self.RootNode = None
+            self.deleteLeafFromMaps(delete_nd)
+            return self.RootHash
+
+        elif len(self.entries_map) == 2:
+            '''
+            special case: 2 nodes in tree prior to delete getAndRemove set
+            remaning node equal to rootnode Haven't deleted from entries yet
+            so do it now
+            '''
+            self.deleteLeafFromMaps(delete_nd)
+            return self.RootHash
+        temp_node, temp_node.parent = right_node, delete_nd.parent
+        if delete_nd == delete_nd.parent.right:
+            temp_node.parent.right = temp_node
+
+        while temp_node.parent != self.RootNode:
+            sibling = None
+            if
+
         #TODO check if tree is balanced and then go balance it
 
     def VerifyMerklePath(self, entry, merkle_path):
@@ -205,8 +265,8 @@ class MerkleTree:
         node = self.entries_map[entry]
         parent_hash = node.entry.key
         for i in range(len(merkle_path)):
-            #check if right or left
             if parent_hash not in self.node_map:
+                #check if right or left
                 return False
             if self.node_map[parent_hash] == self.node_map[parent_hash].parent.left:
                 str = parent_hash + merkle_path[i]
