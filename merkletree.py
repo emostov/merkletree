@@ -188,20 +188,20 @@ class MerkleTree:
         '''
         right_nd = self.RootNode
         while right_nd.is_leaf != True:
-            right_nd = nd.right
-        if right_nd.parent = None:
+            right_nd = right_nd.right
+        if right_nd.parent == None:
             #special case 1 leaf
             return right_nd
-        elif right_nd.parent = self.RootNode:
+        elif right_nd.parent == self.RootNode:
             #special case 2 leafs
             self.RootNode = right_nd.parent.left
             self.RootNode.parent = None
 #            return self.RootNode this is implicit at end of func
         else:
             grandparent = right_nd.parent.parent
-            grandparent.right = righ_nd.parent.left
+            grandparent.right = right_nd.parent.left
             right_nd.parent.left.parent = grandparent
-        parent_to_delete = righ_nd.parent.entry.key
+        parent_to_delete = right_nd.parent.entry.key
         del self.node_map[parent_to_delete]
         return right_nd
 
@@ -222,13 +222,14 @@ class MerkleTree:
 
         delete_nd = self.entries_map[entry]
         right_nd = self.getAndRemoveRightMostNode()
-        if right_nd == delete_nd:
-            if len(self.entries_map) == 1:
-                #special case of only one node in tree
-                self.RootHash = None
-                self.RootNode = None
+        if len(self.entries_map) == 1:
+            #special case of only one node in tree
+            self.RootHash = None
+            self.RootNode = None
             self.deleteLeafFromMaps(delete_nd)
             return self.RootHash
+        #     temp_node = delete_nd.parent
+        #     return self.RootHash
 
         elif len(self.entries_map) == 2:
             '''
@@ -238,39 +239,45 @@ class MerkleTree:
             '''
             self.deleteLeafFromMaps(delete_nd)
             return self.RootHash
-
-        temp_node, temp_node.parent = right_node, delete_nd.parent
-        if delete_nd == delete_nd.parent.right:
-            temp_node.parent.right = temp_node
+        temp_node = None
+        if right_nd == delete_nd:
+            #deleting the farthest right node
+            temp_node = delete_nd.parent.left
+            self.deleteLeafFromMaps(delete_nd)
         else:
-            temp_node.parent.left = temp_node
-
-        while temp_node.parent != self.RootNode:
-            node_to_delete_key = temp_root.parent.entry.key
+            temp_node, temp_node.parent = right_nd, delete_nd.parent
+            if delete_nd == delete_nd.parent.right:
+                temp_node.parent.right = temp_node
+            else:
+                temp_node.parent.left = temp_node
+        print("temp before loop", temp_node.entry.value, temp_node.parent.entry.value)
+        while temp_node != self.RootNode:
+            node_to_delete_key = temp_node.parent.entry.key
             if temp_node == temp_node.parent.right:
                 sibling = temp_node.parent.left
                 str = sibling.entry.key + temp_node.entry.key
-                new_val = sibling.entry.value + temp_root.entry.value
+                new_val = sibling.entry.value + temp_node.entry.value
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-                new_nd = Node(temp_root.parent.left, temp_root)
+                new_nd = Node(temp_node.parent.left, temp_node)
                 new_nd.makeEntry(new_nd_h, new_val)
-                self.checkIfGranparentRoot(temp_root, new_nd)
-                new_nd.teachKids(temp_root.parent.left, temp_root)
+                self.checkIfGranparentRoot(temp_node, new_nd)
+                new_nd.teachKids(temp_node.parent.left, temp_node)
             else:
                 sibling = temp_node.parent.right
                 str = temp_node.entry.key + sibling.entry.key
-                new_val = temp_root.entry.value + sibling.entry.value
+                new_val = temp_node.entry.value + sibling.entry.value
                 new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-                new_nd = Node(temp_root, temp_root.parent.right)
+                new_nd = Node(temp_node, temp_node.parent.right)
                 new_nd.makeEntry(new_nd_h, new_val)
-                self.checkIfGranparentRoot(temp_root, new_nd)
+                self.checkIfGranparentRoot(temp_node, new_nd)
                 #above sets to new_nd to root if applicable
-                new_nd.teachKids(temp_root, temp_root.parent.right)
+                new_nd.teachKids(temp_node, temp_node.parent.right)
             self.node_map[new_nd_h] = new_nd
             del self.node_map[node_to_delete_key] #delete old parent
-            temp_root = new_nd
+            print("new_nd", new_nd.entry.value)
+            temp_node = new_nd
             #if new_nd is root then loop stops
         return self.RootHash
 
