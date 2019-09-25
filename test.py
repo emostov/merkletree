@@ -48,6 +48,9 @@ def printNodeMap(t):
     for key in t.node_map.keys():
         print (t.node_map[key].entry.toString())
 
+def printEntryMap(t):
+    for key in t.entries_map.keys():
+        print (t.entries_map[key].entry.toString())
 
 def test():
     t = MerkleTree()
@@ -88,6 +91,91 @@ def printMerklePath(t, merklepath):
     for key in merklepath:
         print(t.node_map[key].entry.value)
 
+
+def deleteTest1():
+    t = MerkleTree()
+    a = Entry("a")
+    a.makeKey()
+    print(a.key)
+    b = Entry("b")
+    b.makeKey()
+    c = Entry("c")
+    c.makeKey()
+
+    t.Insert(a)
+    print("insert a test 1____________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(b)
+    print("insert b test 2_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(c)
+    print("insert c test 3_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(a)
+    print("delete a test 4_____________________________________________")
+    print2D(t.RootNode)
+
+def largeDeleteTest():
+    t = MerkleTree()
+    a = Entry("a")
+    a.makeKey()
+    print(a.key)
+    b = Entry("b")
+    b.makeKey()
+    c = Entry("c")
+    c.makeKey()
+    d = Entry("d")
+    d.makeKey()
+    e = Entry("e")
+    e.makeKey()
+    f = Entry("f")
+    f.makeKey()
+    g = Entry("g")
+    g.makeKey()
+
+    t.Insert(a)
+    t.Insert(b)
+    t.Insert(c)
+    t.Insert(d)
+    t.Insert(e)
+    t.Insert(f)
+    t.Insert(g)
+    print("insert g test 7_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(g)
+    print("delete g test 8_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(a)
+    print("delete a test 9_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(c)
+    print("delete c test 10_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(b)
+    print("delete b test 11_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(d)
+    print("delete d test 12_____________________________________________")
+    print2D(t.RootNode)
+
+    print("___Below is entry map before deleting f___")
+    printEntryMap(t)
+    t.Delete(f)
+    print("delete f test 13_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(e)
+    print("delete e test 13_____________________________________________")
+    print2D(t.RootNode)
+
 def largeTest():
     t = MerkleTree()
     a = Entry("a")
@@ -121,7 +209,6 @@ def largeTest():
     t.Insert(d)
     print("insert d test 4_____________________________________________")
     print2D(t.RootNode)
-
 
     t.Insert(e)
     print("insert e test 5_____________________________________________")
@@ -169,4 +256,7 @@ def largeTest():
     #printNodeMap(t)
 
 #test()
-largeTest()
+#largeTest()
+#deleteTest1()
+
+largeDeleteTest()
