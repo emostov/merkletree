@@ -225,33 +225,13 @@ class MerkleTree:
     def removeRightMostNode(self, right_nd):
         '''
         Removes right most node from its spot and returns it. Deletes the
-        parent of right most node and points sibling to grandparent. Deals
-        with special case of 1 or 2 leafs. Does not delete rightnode from maps
+        parent of right most node and points sibling to grandparent.
         '''
-        # if len(self.entries_map) == 1:
-        #     #special case of only one node in tree
-        #     self.RootHash = None
-        #     self.RootNode = None
-        #     self.deleteLeafFromMaps(delete_nd)
-        #     return self.RootNode
-        # elif len(self.entries_map) == 2:
-        #     #special case 2 leafs
-        #     parent_to_delete = right_nd.parent.entry.key
-        #     if rignt_nd == delete_nd:
-        #         self.RootNode = right_nd.parent.left
-        #     else:
-        #         self.RootNode = right_nd
-        #     self.RootNode.left, self.RootNode.right, self.RootNode.parent = None, None, None
-        #     self.RootHash = self.RootNode.entry.key
-        #     self.deleteLeafFromMaps(delete_nd)
-        #     del self.node_map[parent_to_delete]
-        #     return self.RootNode
-        #else:
         if right_nd.parent == self.RootNode:
             #special case 2 leafs
             self.RootNode = right_nd.parent.left
             self.RootNode.parent = None
-#            return self.RootNode this is implicit at end of func
+
         else:
             grandparent = right_nd.parent.parent
             grandparent.right = right_nd.parent.left
@@ -272,7 +252,7 @@ class MerkleTree:
         Merkle Tree and finds that key. If the key exists, delete the
         corresponding Entry and re-balance the tree if necessary. Delete
         function will return updated root hash if the key was found otherwise
-        return empty string (or ‘’path_not_found”) if the key doesn't exist.
+        "path_not_found” if the key doesn't exist.
         '''
         if entry not in self.entries_map:
             return 'path_not_found'
@@ -283,18 +263,14 @@ class MerkleTree:
         '''
         Below is logic block for special cases.
         Special case 1: only one node in tree prior to delete.
-        Special case: 2 nodes in tree prior to delete. .GetAndRemove already
-        Set remaning node equal to rootnode Haven't deleted from entries
-        yet so do it now
+        Special case: 2: leafs in tree prior to delete.
         '''
         if len(self.entries_map) == 1:
-            #special case of only one node in tree
             self.RootHash = None
             self.RootNode = None
             self.deleteLeafFromMaps(delete_nd)
             return self.RootNode
         elif len(self.entries_map) == 2:
-            #special case 2 leafs
             parent_to_delete = right_nd.parent.entry.key
             if right_nd == delete_nd:
                 self.RootNode = right_nd.parent.left
@@ -305,27 +281,7 @@ class MerkleTree:
             self.deleteLeafFromMaps(delete_nd)
             del self.node_map[parent_to_delete]
             return self.RootNode
-        #if len(self.entries_map) < 3:
-            #special case of only one node in tree
 
-            # self.RootHash = None
-            # self.RootNode = None
-            # self.deleteLeafFromMaps(delete_nd)
-            # return right_nd.RootHash
-            #return self.RootHash
-        # elif len(self.entries_map) == 2:
-        #     '''
-        #     special case: 2 nodes in tree prior to delete. .GetAndRemove already
-        #     set remaning node equal to rootnode Haven't deleted from entries
-        #     yet so do it now
-        #     '''
-        #     # if rignt_nd == delete_nd:
-        #     #     self.RootNode = right_nd.parent.left
-        #     # else:
-        #     #     self.RootNode = right_nd
-        #     # self.RootNode.left, self.RootNode.left = None, None
-        #     self.deleteLeafFromMaps(delete_nd)
-        #     return self.RootHash
         right_nd = self.removeRightMostNode(right_nd)
         temp_node = None
         if right_nd == delete_nd:
