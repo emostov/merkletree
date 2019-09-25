@@ -84,7 +84,7 @@ def test():
 
 
 def printMerklePath(t, merklepath):
-    print('below is merkle path')
+#    print('below is merkle path')
     for key in merklepath:
         print(t.node_map[key].entry.value)
 

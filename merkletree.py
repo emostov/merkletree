@@ -203,17 +203,8 @@ class MerkleTree:
         if entry not in self.entries_map.keys():
             return False
         node = self.entries_map[entry]
-        i = 0
-        # is_left = False
-        # if node == node.parent.left:
-        #     is_left = True
-        #     #print(" in left set")
-        # else:
-        #     is_left = False
         parent_hash = node.entry.key
-        #print(node.entry.toString())
-        #print(self.node_map[merkle_path[i]].entry.toString())
-        while i < len(merkle_path):
+        for i in range(len(merkle_path)):
             #check if right or left
             if parent_hash not in self.node_map:
                 return False
@@ -222,5 +213,5 @@ class MerkleTree:
             else:
                 str = merkle_path[i] + parent_hash
             parent_hash = hashlib.sha512(str.encode()).hexdigest()
-            i += 1
+
         return parent_hash == self.RootHash
