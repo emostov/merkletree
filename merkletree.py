@@ -2,7 +2,7 @@ import hashlib
 import random
 import math
 
-#poweroftwo is from geeks to geeks
+#isPoweroftwo is from geeks to geeks
 # Function to check
 # Log base 2
 def Log2(x):
@@ -71,11 +71,8 @@ class Node:
         if self.parent:
             if is_right:
                 self.parent.right = self
-                print("reassign right")
             else:
                 self.parent.left = self
-                print("reassign left")
-
 
 class Entry:
     def __init__(self, value, key=None):
@@ -89,7 +86,6 @@ class Entry:
 
     def toString(self):
         return "{key: "+self.key+", value: "+self.value+"}"
-
 
 class MerkleTree:
     def __init__(self):
@@ -224,8 +220,7 @@ class MerkleTree:
 
     def removeRightMostNode(self, right_nd):
         '''
-        Removes right most node from its spot and returns it. Deletes the
-        parent of right most node and points sibling to grandparent.
+        Removes right most node from its spot and returns it
         '''
         if right_nd.parent == self.RootNode:
             #special case 2 leafs
@@ -243,8 +238,6 @@ class MerkleTree:
     def deleteLeafFromMaps(self, node):
         del self.entries_map[node.entry]
         del self.node_map[node.entry.key]
-
-
 
     def Delete(self, entry):
         '''
@@ -287,20 +280,15 @@ class MerkleTree:
         if right_nd == delete_nd:
             #deleting the farthest right node
             temp_node = delete_nd.parent.left
-            #self.deleteLeafFromMaps(delete_nd)
         else:
             temp_node, temp_node.parent = right_nd, delete_nd.parent
             if delete_nd == delete_nd.parent.right:
                 temp_node.parent.right = temp_node
             else:
                 temp_node.parent.left = temp_node
-
-        print("delete_nd,", delete_nd.entry.toString())
         self.deleteLeafFromMaps(delete_nd)
         while temp_node != self.RootNode:
             is_right = True
-            print("temp before loop")
-            temp_node.printNodePointers()
             if temp_node.parent.parent:
                 #check what side for teaching parent later
                 if temp_node.parent == temp_node.parent.parent.right:
@@ -310,7 +298,6 @@ class MerkleTree:
 
             node_to_delete_key = temp_node.parent.entry.key
             if temp_node == temp_node.parent.right:
-                print("in right")
                 sibling = temp_node.parent.left
                 str = sibling.entry.key + temp_node.entry.key
                 new_val = sibling.entry.value + temp_node.entry.value
@@ -320,10 +307,9 @@ class MerkleTree:
                 new_nd.makeEntry(new_nd_h, new_val)
                 self.checkIfGranparentRoot(temp_node, new_nd)
                 new_nd.teachKids(temp_node.parent.left, temp_node)
-                new_nd.teachParentMyName(is_right)
+                #new_nd.teachParentMyName(is_right)
 
             elif temp_node == temp_node.parent.left:
-                print("in left")
                 sibling = temp_node.parent.right
                 str = temp_node.entry.key + sibling.entry.key
                 new_val = temp_node.entry.value + sibling.entry.value
@@ -334,14 +320,12 @@ class MerkleTree:
                 self.checkIfGranparentRoot(temp_node, new_nd)
                 #above sets to new_nd to root if applicable
                 new_nd.teachKids(temp_node, temp_node.parent.right)
-                new_nd.teachParentMyName(is_right)
 
+            new_nd.teachParentMyName(is_right)
             self.node_map[new_nd_h] = new_nd
             del self.node_map[node_to_delete_key] #delete old parent
-            new_nd.printNodePointers()
             temp_node = new_nd
             #if new_nd is root then loop stops
-
         return self.RootHash
 
     def VerifyMerklePath(self, entry, merkle_path):
