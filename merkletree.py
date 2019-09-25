@@ -181,10 +181,11 @@ class MerkleTree:
         return right_nd
 
     def getAndRemoveRightMostNode(self):
-        #removes right most node from its spot and returns it
-        #deletes the parent of right most node and points sibling
-        #to grandparent
-        #Deals with special case of 1 or 2 leafs
+        '''
+        Removes right most node from its spot and returns it. Deletes the
+        parent of right most node and points sibling to grandparent. Deals
+        with special case of 1 or 2 leafs. Does not delete rightnode from maps
+        '''
         right_nd = self.RootNode
         while right_nd.is_leaf != True:
             right_nd = nd.right
@@ -209,13 +210,13 @@ class MerkleTree:
         del self.node_map[node.entry.key]
 
     def Delete(self, entry):
-        """
+        '''
         The Delete function takes a key (Entry) as argument, traverses the
         Merkle Tree and finds that key. If the key exists, delete the
         corresponding Entry and re-balance the tree if necessary. Delete
         function will return updated root hash if the key was found otherwise
         return empty string (or ‘’path_not_found”) if the key doesn't exist.
-        """
+        '''
         if entry not in self.entries_map:
             return 'path_not_found'
 
@@ -231,21 +232,47 @@ class MerkleTree:
 
         elif len(self.entries_map) == 2:
             '''
-            special case: 2 nodes in tree prior to delete getAndRemove set
-            remaning node equal to rootnode Haven't deleted from entries yet
-            so do it now
+            special case: 2 nodes in tree prior to delete. .GetAndRemove already
+            set remaning node equal to rootnode Haven't deleted from entries
+            yet so do it now
             '''
             self.deleteLeafFromMaps(delete_nd)
             return self.RootHash
+
         temp_node, temp_node.parent = right_node, delete_nd.parent
         if delete_nd == delete_nd.parent.right:
             temp_node.parent.right = temp_node
+        else:
+            temp_node.parent.left = temp_node
 
         while temp_node.parent != self.RootNode:
-            sibling = None
-            if
+            node_to_delete_key = temp_root.parent.entry.key
+            if temp_node == temp_node.parent.right:
+                sibling = temp_node.parent.left
+                str = sibling.entry.key + temp_node.entry.key
+                new_val = sibling.entry.value + temp_root.entry.value
+                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
 
-        #TODO check if tree is balanced and then go balance it
+                new_nd = Node(temp_root.parent.left, temp_root)
+                new_nd.makeEntry(new_nd_h, new_val)
+                self.checkIfGranparentRoot(temp_root, new_nd)
+                new_nd.teachKids(temp_root.parent.left, temp_root)
+            else:
+                sibling = temp_node.parent.right
+                str = temp_node.entry.key + sibling.entry.key
+                new_val = temp_root.entry.value + sibling.entry.value
+                new_nd_h = hashlib.sha512(str.encode()).hexdigest()
+
+                new_nd = Node(temp_root, temp_root.parent.right)
+                new_nd.makeEntry(new_nd_h, new_val)
+                self.checkIfGranparentRoot(temp_root, new_nd)
+                #above sets to new_nd to root if applicable
+                new_nd.teachKids(temp_root, temp_root.parent.right)
+            self.node_map[new_nd_h] = new_nd
+            del self.node_map[node_to_delete_key] #delete old parent
+            temp_root = new_nd
+            #if new_nd is root then loop stops
+        return self.RootHash
 
     def VerifyMerklePath(self, entry, merkle_path):
         '''
@@ -273,5 +300,4 @@ class MerkleTree:
             else:
                 str = merkle_path[i] + parent_hash
             parent_hash = hashlib.sha512(str.encode()).hexdigest()
-
         return parent_hash == self.RootHash
