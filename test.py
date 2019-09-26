@@ -40,7 +40,7 @@ def example():
     b = Entry("b") #create an entry instance, initializing value to "a"
     b.makeKey() #create a key based on output of SHA512(value)
     t.Insert(b)
-
+    
     t.generateMerklePath(b) #pass an Entry instance to the method
     #returns [hexDecSHA512(a)] which is the merkle path of b
 

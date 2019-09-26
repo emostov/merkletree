@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha512"
 	"encoding/hex"
+	"fmt"
 	"math"
 )
 
@@ -36,7 +37,7 @@ func (n *Node) makeEntry(key string, value string) {
 	n.entry = entry
 }
 
-func (n *Node) teachKids(left *Node, right *Node) {
+func (n *Node) teachKids() {
 	// check if actually need those inputs
 	n.left.parent = n
 	n.right.parent = n
@@ -45,6 +46,14 @@ func (n *Node) teachKids(left *Node, right *Node) {
 type Entry struct {
 	key   string
 	value string
+}
+
+func PublicNewEntry(value string) *Entry {
+	h := sha512.New()
+	h.Write([]byte(value))
+	key := hex.EncodeToString(h.Sum(nil))
+	e := Entry{key: key, value: value}
+	return &e
 }
 
 func (e *Entry) MakeKey() string {
@@ -119,7 +128,8 @@ func (t *MerkleTree) Insert(entry *Entry) string {
 		new_val := future_sib.entry.value + new_leaf_nd.entry.value
 		new_root := NewNode(future_sib, new_leaf_nd, false)
 		new_root.makeEntry(new_root_hash, new_val)
-		new_root.teachKids(future_sib, new_leaf_nd)
+		// new_root.teachKids(future_sib, new_leaf_nd)
+		new_root.teachKids()
 		t.node_map[new_root_hash] = &new_root
 		return t.updateRoot(&new_root)
 	}
@@ -134,19 +144,99 @@ func (t *MerkleTree) Insert(entry *Entry) string {
 		new_nd := NewNode(temp_root.parent, new_leaf_nd, false)
 		new_nd.makeEntry(new_nd_h, new_val)
 		t.checkIfGrandParentRoot(temp_root, &new_nd)
-		new_nd.teachKids(temp_root.parent, new_leaf_nd)
+		//new_nd.teachKids(temp_root.parent, new_leaf_nd)
+		new_nd.teachKids()
 		t.node_map[new_nd_h] = &new_nd
 		temp_root = &new_nd
 	} else if temp_root.parent.left.is_leaf == false && temp_root.is_leaf == true {
 		str := temp_root.entry.key + new_leaf_nd.entry.key
 		new_nd_h := getHash(str)
+		new_val := temp_root.entry.value + new_leaf_nd.entry.value
+		new_nd := NewNode(temp_root, new_leaf_nd, false)
+		new_nd.makeEntry(new_nd_h, new_val)
+		new_nd.parent = temp_root.parent
+		//new_nd.teachKids(temp_root, new_leaf_nd)
+		new_nd.teachKids()
+		t.node_map[new_nd_h] = &new_nd
+		temp_root = &new_nd
+	}
+	//inserts after the initial insert
+	for temp_root != t.RootNode {
+		node_to_delete_key := temp_root.parent.entry.key
+		str := temp_root.parent.left.entry.key + temp_root.entry.key
+		new_nd_h := getHash(str)
+		new_val := temp_root.parent.left.entry.value + temp_root.entry.value
+		new_nd := NewNode(temp_root.parent.left, temp_root, false)
+		new_nd.makeEntry(new_nd_h, new_val)
+		t.checkIfGrandParentRoot(temp_root, &new_nd)
+		new_nd.teachKids()
+		t.node_map[new_nd_h] = &new_nd
+		delete(t.node_map, node_to_delete_key)
+		temp_root = &new_nd
+	}
+	return t.updateRoot(temp_root)
+}
+
+// Below is testing
+var COUNT int = 10
+
+func print2DUtil(root *Node, space int) {
+	if root == nil {
+		return
 	}
 
-	//initial insert of leaf and there is already a lonely leaf
+	space += COUNT
+	print2DUtil(root.right, space)
 
-	return t.RootHash
+	fmt.Printf("\n")
+	for i := COUNT; i < space; i++ {
+		fmt.Printf(" ")
+	}
+	fmt.Printf(root.entry.value)
+
+	print2DUtil(root.left, space)
+	println()
+}
+
+func print2D(root *Node) {
+	print2DUtil(root, 0)
+}
+
+func insertTest1() {
+	t := NewMerkleTree()
+	a := PublicNewEntry("a")
+	b := PublicNewEntry("b")
+	c := PublicNewEntry("c")
+	d := PublicNewEntry("d")
+	e := PublicNewEntry("e")
+	f := PublicNewEntry("f")
+	g := PublicNewEntry("g")
+
+	fmt.Println("test 1 insert a ________")
+	t.Insert(a)
+	print2D(t.RootNode)
+	fmt.Println("test 2 insert b ________")
+	t.Insert(b)
+	print2D(t.RootNode)
+	fmt.Println("test 3 insert c ________")
+	t.Insert(c)
+	print2D(t.RootNode)
+	fmt.Println("test 4 insert d ________")
+	t.Insert(d)
+	print2D(t.RootNode)
+
+	fmt.Println("test 5 insert e ________")
+	t.Insert(e)
+	print2D(t.RootNode)
+	fmt.Println("test 6 insert f ________")
+	t.Insert(f)
+	print2D(t.RootNode)
+	fmt.Println("test 7 insert g ________")
+	t.Insert(g)
+	print2D(t.RootNode)
+
 }
 
 func main() {
-
+	insertTest1()
 }
