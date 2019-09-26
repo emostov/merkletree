@@ -153,7 +153,7 @@ class MerkleTree:
             new_nd = Node(temp_root.parent, new_leaf_node)
             new_nd.makeEntry(new_nd_h, new_val)
 
-            new_nd.makeEntry(new_nd_h, new_val)
+#            new_nd.makeEntry(new_nd_h, new_val)
             self.checkIfGranparentRoot(temp_root, new_nd)
             new_nd.teachKids(temp_root.parent, new_leaf_node)
             self.node_map[new_nd_h] = new_nd
@@ -238,6 +238,7 @@ class MerkleTree:
     def deleteLeafFromMaps(self, node):
         del self.entries_map[node.entry]
         del self.node_map[node.entry.key]
+        self.entries.remove(node.entry)
 
     def Delete(self, entry):
         '''
