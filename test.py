@@ -40,7 +40,7 @@ def example():
     b = Entry("b") #create an entry instance, initializing value to "a"
     b.makeKey() #create a key based on output of SHA512(value)
     t.Insert(b)
-    
+
     t.generateMerklePath(b) #pass an Entry instance to the method
     #returns [hexDecSHA512(a)] which is the merkle path of b
 
@@ -176,6 +176,54 @@ def largeDeleteTest():
     print("delete e test 13_____________________________________________")
     print2D(t.RootNode)
 
+def verifyTest():
+    t = MerkleTree()
+    a = Entry("a")
+    a.makeKey()
+    print(a.key)
+    b = Entry("b")
+    b.makeKey()
+    c = Entry("c")
+    c.makeKey()
+    d = Entry("d")
+    d.makeKey()
+
+    t.Insert(a)
+    print("insert a test 1____________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(b)
+    print("insert b test 2_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(c)
+    print("insert c test 3_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(d)
+    print("insert d test 4_____________________________________________")
+    print2D(t.RootNode)
+
+    pathA = t.generateMerklePath(a.key)
+    print("a's merkle path")
+    printMerklePath(t, pathA)
+    print("a verification", t.VerifyMerklePath(a, 0, pathA))
+
+    pathB = t.generateMerklePath(b.key)
+    print("b merkle path below")
+    printMerklePath(t, pathB)
+    print("b verification", t.VerifyMerklePath(b,1, pathB))
+
+    pathC = t.generateMerklePath(c.key)
+    print("c path")
+    printMerklePath(t, pathC)
+    print("c verification", t.VerifyMerklePath(c,2, pathC))
+
+    pathD = t.generateMerklePath(d.key)
+    print("d path")
+    printMerklePath(t, pathD)
+    print("d verification", t.VerifyMerklePath(d, 3, pathD))
+
 def largeTest():
     t = MerkleTree()
     a = Entry("a")
@@ -223,40 +271,38 @@ def largeTest():
     print2D(t.RootNode)
 
     pathA = t.generateMerklePath(a.key)
-    print("a's merkle path")
-    printMerklePath(t, pathA)
-    print("a verification", t.VerifyMerklePath(a, pathA))
+    #print("a's merkle path")
+    #printMerklePath(t, pathA)
+    print("a verification", t.VerifyMerklePath(a, 0, pathA))
 
     pathB = t.generateMerklePath(b.key)
-    print("b merkle path below")
-    printMerklePath(t, pathB)
-    print("b verification", t.VerifyMerklePath(b, pathB))
+    #print("b merkle path below")
+    #printMerklePath(t, pathB)
+    print("b verification", t.VerifyMerklePath(b,1, pathB))
 
     pathC = t.generateMerklePath(c.key)
     # print("c path")
     # printMerklePath(t, path)
-    print("c verification", t.VerifyMerklePath(c, pathC))
+    print("c verification", t.VerifyMerklePath(c,2, pathC))
 
     pathE = t.generateMerklePath(e.key)
     #print("e path")
-    #printMerklePath(t, path)
-    print("e verification", t.VerifyMerklePath(e, pathE))
+    #printMerklePath(t, pathE)
+    print("e verification", t.VerifyMerklePath(e, 4, pathE))
 
     pathG = t.generateMerklePath(g.key)
-    # print("g path")
-    # printMerklePath(t, pathG)
-    print("g verification", t.VerifyMerklePath(g, pathG))
+    print("g path")
+    printMerklePath(t, pathG)
+    print("g verification", t.VerifyMerklePath(g, 6, pathG))
 
     fake_node = Entry("fake_node")
     fake_node.makeKey()
     print("fake node verification with a's merkle path", t.VerifyMerklePath(fake_node, pathA))
 
-
-
     #printNodeMap(t)
 
 #test()
-#largeTest()
+largeTest()
 #deleteTest1()
-
-largeDeleteTest()
+#verifyTest()
+#largeDeleteTest()

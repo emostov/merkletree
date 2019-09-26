@@ -177,6 +177,50 @@ func (t *MerkleTree) Insert(entry *Entry) string {
 	return t.updateRoot(temp_root)
 }
 
+func (t *MerkleTree) GenerateMerklePath(key string) []string {
+	var merkle_path []string
+	node, ok := t.node_map[key]
+	if !ok {
+		err := []string{"path_not_found"}
+		return err
+	}
+	for node != t.RootNode {
+		if node.parent.right == node {
+			merkle_path = append(merkle_path, node.parent.left.entry.key)
+		} else {
+			merkle_path = append(merkle_path, node.parent.right.entry.key)
+		}
+		node = node.parent
+	}
+	return merkle_path
+}
+
+func (t *MerkleTree) VerifyMerklePath(entry *Entry, location int, merkle_path []string) bool {
+
+}
+
+func (t *MerkleTree) getRightMostNode() *Node {
+	right_nd := t.RootNode
+	for right_nd.is_leaf == false {
+		right_nd = right_nd.right
+	}
+	return right_nd
+}
+
+func (t *MerkleTree) removeRightMostNode(right_nd *Node) *Node {
+	if right_nd.parent == t.RootNode {
+		t.RootNode = right_nd.parent.left
+		t.RootNode.parent = nil
+	} else {
+		grandparent := right_nd.parent.parent
+		grandparent.right = right_nd.parent.left
+		right_nd.parent.left.parent = grandparent
+	}
+	parent_to_delete := right_nd.parent.entry.key
+	delete(t.node_map, parent_to_delete)
+	return right_nd
+}
+
 // Below is testing
 var COUNT int = 10
 

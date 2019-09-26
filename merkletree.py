@@ -223,7 +223,7 @@ class MerkleTree:
         Removes right most node from its spot and returns it
         '''
         if right_nd.parent == self.RootNode:
-            #special case 2 leafs
+            #right is standalone and directly below root
             self.RootNode = right_nd.parent.left
             self.RootNode.parent = None
 
@@ -329,30 +329,30 @@ class MerkleTree:
             #if new_nd is root then loop stops
         return self.RootHash
 
-    def VerifyMerklePath(self, entry, merkle_path):
-        '''
-        The VerifyMerklePath function takes a key (Entry) and its Merkle path,
-        the ordered list of sibling hashes as argument. It computes all the
-        hashes on the path from the given Entry to the root using the location
-        and the MerklePath. The newly computed root hash is compared to the
-        stored root for verification. Function returns true if the
-        verification succeeds (if the newly computed root hash is equal to
-        the stored root hash) otherwise return false.
-        Arguments: Entry object, location (or index) of this Entry object in
-        the Merkle Tree, and the list/array of hashes on Merkle Path
-        Return: bool
-        '''
-        if entry not in self.entries_map.keys():
-            return False
-        node = self.entries_map[entry]
-        parent_hash = node.entry.key
-        for i in range(len(merkle_path)):
-            if parent_hash not in self.node_map:
-                #check if right or left
-                return False
-            if self.node_map[parent_hash] == self.node_map[parent_hash].parent.left:
-                str = parent_hash + merkle_path[i]
+    def _VerifyMerklePath(self, entry, location, merkle_path):
+        #https://bitcoin.stackexchange.com/questions/69018/merkle-root-and-merkle-proofs
+        route = bin((2**len(merkle_path)) + location)
+        parent_hash = entry.key
+        j = 0
+        print("route", route)
+        for i in range(len(route)-1, 2, -1):
+            #print("byte ", route[i])
+            if route[i] == "0":
+                #left
+                str = parent_hash + merkle_path[j]
             else:
-                str = merkle_path[i] + parent_hash
+                #right
+                str = merkle_path[j] + parent_hash
             parent_hash = hashlib.sha512(str.encode()).hexdigest()
+            j += 1
         return parent_hash == self.RootHash
+
+    def VerifyMerklePath(self, entry, location, merkle_path):
+        def r(key, merkle_path):
+            if len(merkle_path) == 0:
+                return key == self.RootHash
+            else:
+                left = hashlib.sha512((key + merkle_path[0]).encode()).hexdigest()
+                right = hashlib.sha512((merkle_path[0] + key).encode()).hexdigest()
+                return r(left, merkle_path[1:]) or r(right, merkle_path[1:])
+        return r(entry.key, merkle_path)
