@@ -7,10 +7,14 @@ import (
 	"math"
 )
 
-//	"crypto/sha512"
-//	"encoding/hex"
-//	"encoding/json"
-//	"fmt"
+// General utils
+func getHash(str string) string {
+	h := sha512.New()
+	h.Write([]byte(str))
+	out_hash := hex.EncodeToString(h.Sum(nil))
+	return out_hash
+}
+
 func isPowerOfTwo(n int) bool {
 	x := float64(n)
 	if n == 0 {
@@ -18,6 +22,17 @@ func isPowerOfTwo(n int) bool {
 	}
 	return math.Ceil(math.Log2(x)) == math.Floor(math.Log2(x))
 }
+
+func removeEntry(l []*Entry, item *Entry) []*Entry {
+	for i, other := range l {
+		if other == item {
+			return append(l[:i], l[i+1:]...)
+		}
+	}
+	return nil
+}
+
+// Structs followed by there methods
 
 type Node struct {
 	left    *Node
@@ -37,10 +52,20 @@ func (n *Node) makeEntry(key string, value string) {
 	n.entry = entry
 }
 
-func (n *Node) teachKids() {
+func (nd *Node) teachKids() {
 	// check if actually need those inputs
-	n.left.parent = n
-	n.right.parent = n
+	nd.left.parent = nd
+	nd.right.parent = nd
+}
+
+func (nd *Node) teachParentMyName(is_right bool) {
+	if nd.parent != nil {
+		if is_right == true {
+			nd.parent.right = nd
+		} else {
+			nd.parent.left = nd
+		}
+	}
 }
 
 type Entry struct {
@@ -56,22 +81,6 @@ func PublicNewEntry(value string) *Entry {
 	return &e
 }
 
-func (e *Entry) MakeKey() string {
-	h := sha512.New()
-	h.Write([]byte(e.value))
-	sha512_hash := hex.EncodeToString(h.Sum(nil))
-	return sha512_hash
-}
-
-// func (e *Entry) toJson() []byte {
-// 	b, err := json.Marshal(e)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return
-// 	}
-// 	return b
-// }
-
 type MerkleTree struct {
 	RootNode  *Node
 	RootHash  string
@@ -84,6 +93,8 @@ func NewMerkleTree() *MerkleTree {
 	t := new(MerkleTree)
 	t.entry_map = make(map[*Entry]*Node)
 	t.node_map = make(map[string]*Node)
+	t.RootNode = nil
+	t.RootHash = ""
 	return t
 }
 
@@ -108,13 +119,6 @@ func (t *MerkleTree) checkIfGrandParentRoot(nd *Node, new_nd *Node) {
 	} else {
 		t.updateRoot(new_nd)
 	}
-}
-
-func getHash(str string) string {
-	h := sha512.New()
-	h.Write([]byte(str))
-	out_hash := hex.EncodeToString(h.Sum(nil))
-	return out_hash
 }
 
 func (t *MerkleTree) Insert(entry *Entry) string {
@@ -196,7 +200,7 @@ func (t *MerkleTree) GenerateMerklePath(key string) []string {
 }
 
 func (t *MerkleTree) VerifyMerklePath(entry *Entry, location int, merkle_path []string) bool {
-
+	return true
 }
 
 func (t *MerkleTree) getRightMostNode() *Node {
@@ -219,6 +223,83 @@ func (t *MerkleTree) removeRightMostNode(right_nd *Node) *Node {
 	parent_to_delete := right_nd.parent.entry.key
 	delete(t.node_map, parent_to_delete)
 	return right_nd
+}
+
+func (t *MerkleTree) deleteLeafFromMaps(node *Node) {
+	delete(t.entry_map, node.entry)
+	delete(t.node_map, node.entry.key)
+	removeEntry(t.entries, node.entry)
+}
+
+func (t *MerkleTree) Delete(entry *Entry) string {
+	delete_nd, ok := t.entry_map[entry]
+	if !ok {
+		return "path_not_found"
+	}
+	right_nd := t.getRightMostNode()
+	// Special case 1: only one node in tree prior to delete.
+	if len(t.entry_map) == 1 {
+		t.RootHash = ""
+		t.RootNode = nil
+		t.deleteLeafFromMaps(delete_nd)
+		return t.RootHash
+	} else if len(t.entry_map) == 2 { //Special case 2: 2 leafs in tree prior to delete.
+		parent_to_delete := right_nd.parent.entry.key
+		if right_nd == delete_nd {
+			t.RootNode = right_nd.parent.left
+		} else {
+			t.RootNode = right_nd
+		}
+		t.RootNode.left, t.RootNode.right, t.RootNode.parent = nil, nil, nil
+		t.RootHash = t.RootNode.entry.key
+		t.deleteLeafFromMaps(delete_nd)
+		delete(t.node_map, parent_to_delete)
+		return t.RootHash
+	}
+	right_nd = t.removeRightMostNode(right_nd)
+	var temp_node *Node
+	if right_nd == delete_nd { // Special case 3: deleting farthest right node and more then 2 entrys
+		temp_node = delete_nd.parent.left
+	} else {
+		temp_node, temp_node.parent = right_nd, delete_nd.parent
+		if delete_nd == delete_nd.parent.right {
+			temp_node.parent.right = temp_node
+		} else {
+			temp_node.parent.left = temp_node
+		}
+	}
+	for temp_node != t.RootNode {
+		var is_right bool
+		if temp_node.parent.parent == temp_node.parent.parent.right {
+			is_right = true
+		} else if temp_node.parent == temp_node.parent.parent.left {
+			is_right = false
+		}
+		node_to_delete_key := temp_node.parent.entry.key
+		var new_nd Node
+		var str string
+		var new_val string
+		if temp_node == temp_node.parent.right {
+			sibling := temp_node.parent.left
+			str = sibling.entry.key + temp_node.entry.key
+			new_val = sibling.entry.value + temp_node.entry.value
+			new_nd = NewNode(temp_node.parent.left, temp_node, false)
+		} else if temp_node == temp_node.parent.left {
+			sibling := temp_node.parent.right
+			str = temp_node.entry.key + sibling.entry.key
+			new_val = temp_node.entry.value + sibling.entry.value
+			new_nd = NewNode(temp_node, temp_node.parent.right, false)
+		}
+		new_nd_h := getHash(str)
+		new_nd.makeEntry(new_nd_h, new_val)
+		t.checkIfGrandParentRoot(temp_node, &new_nd)
+		new_nd.teachKids()
+		new_nd.teachParentMyName(is_right)
+		t.node_map[new_nd_h] = &new_nd
+		delete(t.node_map, node_to_delete_key) //del old parent
+		temp_node = &new_nd                    // if new_nd is root level then stop
+	}
+	return t.RootHash
 }
 
 // Below is testing

@@ -257,13 +257,13 @@ class MerkleTree:
         '''
         Below is logic block for special cases.
         Special case 1: only one node in tree prior to delete.
-        Special case: 2: leafs in tree prior to delete.
+        Special case 2: 2 leafs in tree prior to delete.
         '''
         if len(self.entries_map) == 1:
             self.RootHash = None
             self.RootNode = None
             self.deleteLeafFromMaps(delete_nd)
-            return self.RootNode
+            return self.RootHash
         elif len(self.entries_map) == 2:
             parent_to_delete = right_nd.parent.entry.key
             if right_nd == delete_nd:
@@ -274,7 +274,7 @@ class MerkleTree:
             self.RootHash = self.RootNode.entry.key
             self.deleteLeafFromMaps(delete_nd)
             del self.node_map[parent_to_delete]
-            return self.RootNode
+            return self.RootHash
 
         right_nd = self.removeRightMostNode(right_nd)
         temp_node = None

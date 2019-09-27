@@ -302,7 +302,7 @@ def largeTest():
     #printNodeMap(t)
 
 #test()
-largeTest()
+#largeTest()
 #deleteTest1()
 #verifyTest()
-#largeDeleteTest()
+largeDeleteTest()
