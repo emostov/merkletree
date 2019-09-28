@@ -187,6 +187,9 @@ def verifyTest():
     c.makeKey()
     d = Entry("d")
     d.makeKey()
+    e = makeEntryFromValue("e")
+    f = makeEntryFromValue("f")
+    g = makeEntryFromValue("g")
 
     t.Insert(a)
     print("insert a test 1____________________________________")
@@ -202,6 +205,18 @@ def verifyTest():
 
     t.Insert(d)
     print("insert d test 4_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(e)
+    print("insert e test 5_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(f)
+    print("insert f test 6_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Insert(g)
+    print("insert g test 7_____________________________________________")
     print2D(t.RootNode)
 
     pathA = t.generateMerklePath(a.key)
@@ -223,6 +238,23 @@ def verifyTest():
     print("d path")
     printMerklePath(t, pathD)
     print("d verification", t.VerifyMerklePath(d, 3, pathD))
+
+    pathE = t.generateMerklePath(e.key)
+    print("e's merkle path")
+    printMerklePath(t, pathE)
+    print("e verification", t.VerifyMerklePath(e, 4, pathE))
+
+    pathF = t.generateMerklePath(f.key)
+    print("f's merkle path")
+    printMerklePath(t, pathF)
+    print("f verification", t.VerifyMerklePath(f, 5, pathF))
+
+    pathG = t.generateMerklePath(g.key)
+    print("g's merkle path")
+    printMerklePath(t, pathG)
+    print("g verification", t.VerifyMerklePath(g, 6, pathG))
+
+
 
 def largeTest():
     t = MerkleTree()
@@ -271,23 +303,23 @@ def largeTest():
     print2D(t.RootNode)
 
     pathA = t.generateMerklePath(a.key)
-    #print("a's merkle path")
-    #printMerklePath(t, pathA)
+    print("a's merkle path")
+    printMerklePath(t, pathA)
     print("a verification", t.VerifyMerklePath(a, 0, pathA))
 
     pathB = t.generateMerklePath(b.key)
-    #print("b merkle path below")
-    #printMerklePath(t, pathB)
+    print("b merkle path below")
+    printMerklePath(t, pathB)
     print("b verification", t.VerifyMerklePath(b,1, pathB))
 
     pathC = t.generateMerklePath(c.key)
-    # print("c path")
-    # printMerklePath(t, path)
+    print("c path")
+    printMerklePath(t, path)
     print("c verification", t.VerifyMerklePath(c,2, pathC))
 
     pathE = t.generateMerklePath(e.key)
-    #print("e path")
-    #printMerklePath(t, pathE)
+    print("e path")
+    printMerklePath(t, pathE)
     print("e verification", t.VerifyMerklePath(e, 4, pathE))
 
     pathG = t.generateMerklePath(g.key)
@@ -297,12 +329,45 @@ def largeTest():
 
     fake_node = Entry("fake_node")
     fake_node.makeKey()
-    print("fake node verification with a's merkle path", t.VerifyMerklePath(fake_node, pathA))
+    print("fake node verification with a's merkle path", t.VerifyMerklePath(fake_node, 1, pathA))
 
-    #printNodeMap(t)
+    t.Delete(a)
+    print("delete a test 9_____________________________________________")
+    print2D(t.RootNode)
 
-#test()
-#largeTest()
-#deleteTest1()
-#verifyTest()
-largeDeleteTest()
+    t.Delete(c)
+    print("delete c test 10_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(b)
+    print("delete b test 11_____________________________________________")
+    print2D(t.RootNode)
+
+    print("___Below is entry map before deleting f___")
+    printEntryMap(t)
+    t.Delete(f)
+    print("delete f test 13_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(e)
+    print("delete e test 14_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(g)
+    print("delete g test 15_____________________________________________")
+    print2D(t.RootNode)
+
+    t.Delete(d)
+    print("delete g test 16_____________________________________________")
+    print2D(t.RootNode)
+
+def numInsert(t, num_inserts):
+    for i in range(0, num_inserts):
+        j = str(i)
+        entry = makeEntryFromValue(j)
+        t.Insert(entry)
+        print("insert " + j +" test ____________________________________")
+        print2D(t.RootNode)
+
+
+largeTest()

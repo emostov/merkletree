@@ -5,6 +5,11 @@ import math
 #isPoweroftwo is from geeks to geeks
 # Function to check
 # Log base 2
+def makeEntryFromValue(value):
+    entry = Entry(value)
+    entry.makeKey()
+    return entry
+
 def Log2(x):
     if x == 0:
         return false;
@@ -78,6 +83,11 @@ class Entry:
     def __init__(self, value, key=None):
         self.value = value
         self.key = key
+
+    def makeEntryFromValue(value):
+        entry = Entry(value)
+        entry.makeKey()
+        return entry
 
     def makeKey(self):
         #makes key from value, should only be used when making a leaf
@@ -347,7 +357,7 @@ class MerkleTree:
             j += 1
         return parent_hash == self.RootHash
 
-    def VerifyMerklePath(self, entry, location, merkle_path):
+    def slowVerifyMerklePath(self, entry, location, merkle_path):
         def r(key, merkle_path):
             if len(merkle_path) == 0:
                 return key == self.RootHash
@@ -356,3 +366,17 @@ class MerkleTree:
                 right = hashlib.sha512((merkle_path[0] + key).encode()).hexdigest()
                 return r(left, merkle_path[1:]) or r(right, merkle_path[1:])
         return r(entry.key, merkle_path)
+
+    def VerifyMerklePath(self, entry, location, merkle_path):
+        if location > 2**len(merkle_path) - 1:
+            max_power_of_2, acc = 1, 2
+            while acc < location + 1 and acc % 2 == 0:
+                max_power_of_2 += 1
+                acc = acc * 2
+            acc = acc//2
+            print("acc, max power is", acc, max_power_of_2)
+            relevant_location = 2**(len(merkle_path)-1) + location - acc - 1
+            print(relevant_location)
+            return self._VerifyMerklePath(entry, relevant_location, merkle_path)
+        else:
+            return self._VerifyMerklePath(entry, location, merkle_path)
