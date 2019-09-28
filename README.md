@@ -19,29 +19,33 @@ and value, both in string form.
 
 Note: the entry field of a Node stores the entry and is equivalent to LeafValue
 
-Example:
-An example of how to use Insertion() and generateMerklePath():
+
+An example of how to use Insertion, generateMerklePath, VerifyMerklePath, and Delete:
+
+
     import merkletree
     t = MerkleTree() #create a MerkleTree instance
-    a = Entry("a") #create an entry instance, initializing value to "a"
+    a = Entry("a") # create an entry instance, initializing value to "a"
     a.makeKey() #create a key based on output of SHA512(value)
     t.Insert(a) #insert the complete entry into the tree
     #insert will return a string of the inserted nodes key in hexadecimal
 
-    b = Entry("b") #create an entry instance, initializing value to "a"
+    b = Entry("b") # create an entry instance, initializing value to "a"
     b.makeKey() #create a key based on output of SHA512(value)
     t.Insert(b)
 
-    c = makeEntryFromValue("c") #new function added for easier interface
+    c = makeEntryFromValue("c") # new function added for easier interface
     #creates entry with value and key in one step
     t.Insert(c)
 
-    b_path = t.generateMerklePath(b) #pass an Entry instance to the method
+    b_path = t.generateMerklePath(b) # Pass an Entry instance to the method
     #returns [hexDecSHA512(a)] which is the merkle path of b
 
-    t.VerifyMerklePath(b, 1, b_path) #takes entry, location and merkle_path
+    t.VerifyMerklePath(b, 1, b_path) # Takes entry, location and merkle_path
     #outputs boolean, in this case true. Performed in lg (n) without the use
     #of the tree, other then for accesing root hash field for final comparison
+    
+    t.Delete(b) # Returns updated root hash
 
 Testing:
 Additional utilities are available in test.py. There is a function to print the
