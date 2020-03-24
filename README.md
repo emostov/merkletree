@@ -2,7 +2,7 @@
 September 27, 2019
 
 Summary:
-There are 2 implementations, 1 in python and one in go. The go version is not
+There are 2 implementations, one in python and one in go. The go version is not
 work for deletion and I have not updated the verification function yet. The python
 version is fully working.This is the first try at implementing a merkle tree
 that supports insertion, deletion, finding
